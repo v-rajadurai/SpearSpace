@@ -1,102 +1,66 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 
 export const ShopContext = createContext();
 
 export const ShopProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  // Load cart from localStorage or initialize as an empty array
+  const [cart, setCart] = useState(() => {
+    const storedCart = localStorage.getItem("cart");
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
 
-  // Fetch cart data from backend on component mount
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
-    fetch("http://localhost:8080/cart/items")
-      .then((response) => response.json())
-      .then((data) => setCart(data))
-      .catch((error) => console.error("Error fetching cart:", error));
-  }, []);
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
-  // Function to add/update a product in the cart
-  // Function to add/update a product in the cart
+  // Add to Cart
   const addToCart = (product) => {
-    fetch("http://localhost:8080/cart/items")
-      .then((response) => response.json())
-      .then((data) => {
-        const existingItem = data.find((item) => item.id === product.id);
-  
-        if (existingItem) {
-          updateQuantity(product.id, existingItem.quantity + 1);
-        } else {
-          fetch("http://localhost:8080/cart/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...product, quantity: 1 }),
-          })
-            .then((response) => response.json())
-            .then((newItem) => {
-              setCart((prevCart) => [...prevCart, newItem]); // Update cart state immediately
-            })
-            .catch((error) => console.error("Error adding item:", error));
-        }
-      })
-      .catch((error) => console.error("Error fetching cart items:", error));
-  };
-  
-
-
-  // Function to update quantity (PUT request)
-  const updateQuantity = (id, quantity) => {
-    fetch(`http://localhost:8080/cart/update/quantity/${id}?quantity=${quantity}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then((updatedItem) => {
-        setCart((prevCart) =>
-          prevCart.map((item) => (item.id === id ? updatedItem : item))
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
-      })
-      .catch((error) => console.error("Error updating quantity:", error));
+      }
+      return [...prevCart, { ...product, quantity: 1 }];
+    });
   };
 
-  // Function to increase quantity
+  // Increase Quantity
   const increaseAmount = (id) => {
-    const item = cart.find((item) => item.id === id);
-    if (item) {
-      updateQuantity(id, item.quantity + 1); // Increase the quantity by 1
-    }
+    setCart((prevCart) =>
+      prevCart.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item))
+    );
   };
 
-  // Function to decrease quantity
+  // Decrease Quantity (Removes if < 1)
   const decreaseAmount = (id) => {
-    const item = cart.find((item) => item.id === id);
-    if (item && item.quantity > 1) {
-      updateQuantity(id, item.quantity - 1); // Decrease the quantity by 1
-    }
+    setCart((prevCart) =>
+      prevCart
+        .map((item) =>
+          item.id === id ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 } : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
   };
 
-  // Function to remove an item from the cart (DELETE request)
+  // Remove Item
   const removeFromCart = (id) => {
-    fetch(`http://localhost:8080/cart/delete/${id}`, {
-      method: "DELETE",
-    })
-      .then(() => setCart((prevCart) => prevCart.filter((item) => item.id !== id)))
-      .catch((error) => console.error("Error removing item:", error));
+    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
   };
 
-  // Function to clear the cart (Remove all items)
-  const clearCart = () => {
-    cart.forEach((item) => removeFromCart(item.id)); // Delete all items one by one
+  // **Update Quantity Directly**
+  const updateQuantity = (id, quantity) => {
+    const newQuantity = Math.max(1, parseInt(quantity) || 1); // Prevents zero or negative values
+    setCart((prevCart) =>
+      prevCart.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item))
+    );
   };
 
   return (
     <ShopContext.Provider
-      value={{
-        cart,
-        addToCart,
-        increaseAmount,
-        decreaseAmount,
-        updateQuantity,
-        removeFromCart,
-        clearCart,
-      }}
+      value={{ cart, addToCart, increaseAmount, decreaseAmount, removeFromCart, updateQuantity }}
     >
       {children}
     </ShopContext.Provider>

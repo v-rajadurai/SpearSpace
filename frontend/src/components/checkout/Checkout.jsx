@@ -12,8 +12,8 @@ function getStepContent(step) {
       return <AddressForm />;
     case 1:
       return <Review />; // Moved Review to second step
-    case 2:
-      return <Payment />; // Payment is now the last step
+      case 2:
+        return <Payment />; // Payment is now the last step
     default:
       throw new Error('Unknown step');
   }
@@ -63,7 +63,7 @@ export default function Checkout() {
               onClick={handleNext}
               className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
-              {activeStep === steps.length - 1 ? 'Place order' : 'Next'}
+              {activeStep === steps.length - 1 ? 'Pay Now' : 'Next'}
               <ChevronRightIcon className="w-5 h-5 ml-2" />
             </button>
           </div>

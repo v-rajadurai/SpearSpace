@@ -1,100 +1,352 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ShopContext } from "../context/ShopContext";
 
-export default function Payment() {
-  const [paymentType, setPaymentType] = useState("creditCard");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [expirationDate, setExpirationDate] = useState("");
+const Payment = () => {
+  const navigate = useNavigate();
 
-  const handlePaymentTypeChange = (type) => {
-    setPaymentType(type);
+  const { cart } = useContext(ShopContext);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Calculate total amount
+  const totalAmount = cart.reduce(
+    (total, item) =>
+      total +
+      (item.price - (item.discount || 0)) * item.quantity,
+    0
+  );
+
+  // Format amount
+  const formatAmount = (amount) => {
+    return Number(amount).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
-  const handleCardNumberChange = (event) => {
-    let value = event.target.value.replace(/\D/g, "");
-    value = value.replace(/(\d{4})(?=\d)/g, "$1 ");
-    setCardNumber(value.slice(0, 19));
-  };
+  // Demo Payment
+  const initiatePayment = () => {
+    setError("");
 
-  const handleCvvChange = (event) => {
-    setCvv(event.target.value.replace(/\D/g, "").slice(0, 3));
-  };
+    // Check cart
+    if (!cart || cart.length === 0) {
+      setError("Your cart is empty.");
+      return;
+    }
 
-  const handleExpirationDateChange = (event) => {
-    let value = event.target.value.replace(/\D/g, "");
-    value = value.replace(/(\d{2})(?=\d{2})/, "$1/");
-    setExpirationDate(value.slice(0, 5));
+    // Check amount
+    if (totalAmount <= 0) {
+      setError("Invalid payment amount.");
+      return;
+    }
+
+    setLoading(true);
+
+    /*
+     * DEMO PAYMENT
+     *
+     * We simulate payment processing
+     * for 1.5 seconds.
+     */
+    setTimeout(() => {
+      try {
+        // Generate demo IDs
+        const orderId =
+          "DEMO_ORDER_" + Date.now();
+
+        const paymentId =
+          "DEMO_PAYMENT_" + Date.now();
+
+        // Order details
+        const orderDetails = {
+          orderId: orderId,
+
+          paymentId: paymentId,
+
+          amount: totalAmount,
+
+          date: new Date().toLocaleString(),
+
+          customerName: "Rajadurai Venkat",
+
+          phone: "7092961093",
+
+          address:
+            "13/8, Kumarapalayam, Sellandipatti(po), Velliyanai North, Karur, Tamil Nadu - 639118",
+
+          products: cart.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            discount: item.discount || 0,
+            quantity: item.quantity,
+          })),
+        };
+
+        // Save order information
+        localStorage.setItem(
+          "lastOrder",
+          JSON.stringify(orderDetails)
+        );
+
+        // Clear cart
+        localStorage.removeItem("cart");
+
+        /*
+         * If your ShopContext has a clearCart()
+         * function, use it here as well.
+         */
+
+        setLoading(false);
+
+        // Navigate to success page
+        navigate("/payment-success");
+      } catch (error) {
+        console.error(error);
+
+        setLoading(false);
+
+        setError(
+          "Payment failed. Please try again."
+        );
+      }
+    }, 1500);
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-lg font-semibold mb-4">Select Payment Method</h2>
-      
-      <div className="flex space-x-4 mb-4">
-        <button
-          className={`w-1/2 p-3 rounded-lg border ${
-            paymentType === "creditCard" ? "border-blue-500 bg-blue-100" : "border-gray-300"
-          }`}
-          onClick={() => handlePaymentTypeChange("creditCard")}
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#f5f7fa",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "30px",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "450px",
+          backgroundColor: "#ffffff",
+          padding: "35px",
+          borderRadius: "15px",
+          boxShadow:
+            "0 5px 25px rgba(0, 0, 0, 0.12)",
+        }}
+      >
+        {/* Heading */}
+
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: "10px",
+            color: "#222",
+          }}
         >
-          💳 Credit Card
-        </button>
-        <button
-          className={`w-1/2 p-3 rounded-lg border ${
-            paymentType === "bankTransfer" ? "border-blue-500 bg-blue-100" : "border-gray-300"
-          }`}
-          onClick={() => handlePaymentTypeChange("bankTransfer")}
+          Complete Payment
+        </h2>
+
+        <p
+          style={{
+            textAlign: "center",
+            color: "#666",
+            marginBottom: "30px",
+          }}
         >
-          🏦 Bank Transfer
+          Eco-Connect Demo Payment
+        </p>
+
+        {/* Amount */}
+
+        <div
+          style={{
+            backgroundColor: "#f8f9fa",
+            padding: "20px",
+            borderRadius: "10px",
+            marginBottom: "25px",
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: "#666",
+            }}
+          >
+            Total Amount
+          </p>
+
+          <h1
+            style={{
+              margin: "8px 0 0",
+              color: "#222",
+            }}
+          >
+            ₹{formatAmount(totalAmount)}
+          </h1>
+        </div>
+
+        {/* Product Information */}
+
+        <div
+          style={{
+            backgroundColor: "#f8f9fa",
+            padding: "15px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "10px",
+            }}
+          >
+            <span>
+              <strong>Products:</strong>
+            </span>
+
+            <span>
+              {cart.length}
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <span>
+              <strong>Payment:</strong>
+            </span>
+
+            <span>
+              Demo Payment
+            </span>
+          </div>
+        </div>
+
+        {/* Products List */}
+
+        <div
+          style={{
+            marginBottom: "20px",
+          }}
+        >
+          {cart.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "8px 0",
+                borderBottom:
+                  "1px solid #eee",
+              }}
+            >
+              <span>
+                {item.name} × {item.quantity}
+              </span>
+
+              <span>
+                ₹
+                {formatAmount(
+                  (item.price -
+                    (item.discount || 0)) *
+                    item.quantity
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Pay Button */}
+
+        <button
+          onClick={initiatePayment}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "14px",
+            border: "none",
+            borderRadius: "7px",
+            backgroundColor: loading
+              ? "#999"
+              : "#3399cc",
+            color: "#fff",
+            fontSize: "17px",
+            fontWeight: "600",
+            cursor: loading
+              ? "not-allowed"
+              : "pointer",
+          }}
+        >
+          {loading
+            ? "Processing Payment..."
+            : `Pay ₹${formatAmount(
+                totalAmount
+              )}`}
         </button>
+
+        {/* Error */}
+
+        {error && (
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "12px",
+              backgroundColor: "#ffecec",
+              color: "#d32f2f",
+              borderRadius: "7px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Back Button */}
+
+        <button
+          onClick={() =>
+            navigate("/checkout")
+          }
+          disabled={loading}
+          style={{
+            width: "100%",
+            marginTop: "12px",
+            padding: "12px",
+            border: "1px solid #ccc",
+            borderRadius: "7px",
+            backgroundColor: "#fff",
+            color: "#333",
+            cursor: "pointer",
+          }}
+        >
+          Back to Checkout
+        </button>
+
+        {/* Demo Notice */}
+
+        <p
+          style={{
+            marginTop: "20px",
+            fontSize: "12px",
+            color: "#777",
+            textAlign: "center",
+          }}
+        >
+          This is a demo payment system.
+          No real money will be charged.
+        </p>
       </div>
-
-      {paymentType === "creditCard" && (
-        <div className="p-4 border border-gray-300 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Enter Card Details</h3>
-          
-          <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700">Card Number</label>
-            <input
-              type="text"
-              className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
-              placeholder="0000 0000 0000 0000"
-              value={cardNumber}
-              onChange={handleCardNumberChange}
-            />
-          </div>
-
-          <div className="flex space-x-3">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700">Expiration Date</label>
-              <input
-                type="text"
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
-                placeholder="MM/YY"
-                value={expirationDate}
-                onChange={handleExpirationDateChange}
-              />
-            </div>
-
-            <div className="w-1/3">
-              <label className="block text-sm font-medium text-gray-700">CVV</label>
-              <input
-                type="text"
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-300"
-                placeholder="123"
-                value={cvv}
-                onChange={handleCvvChange}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {paymentType === "bankTransfer" && (
-        <div className="p-4 border border-gray-300 rounded-lg bg-blue-50 text-blue-700">
-          Bank transfer details will be shared upon order confirmation.
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default Payment;

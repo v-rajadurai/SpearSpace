@@ -10,88 +10,66 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white py-6">
-      <div className="container mx-auto flex flex-col lg:flex-row justify-between px-6">
-        {/* Logo and Tagline */}
-        <div className="flex flex-col items-start">
+    <footer className="bg-white text-black py-8 border-t border-gray-200">
+      <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 px-6">
+        
+        {/* 1️⃣ Logo and Tagline */}
+        <div className="col-span-2 md:col-span-1">
           <img
             src="/images/spearspace-logo.png"
-            className="w-60 pb-2"
+            className="w-48 mb-2"
             alt="SpearSpace Logo"
           />
-          <h6 className="text-lg pl-2">Powering the Future of Space Travel.</h6>
+          <p className="text-gray-600 text-sm">
+            Powering the Future of Space Travel.
+          </p>
         </div>
 
-        {/* About Section */}
-        <div className="flex flex-col mt-6 lg:mt-0">
-          <h5 className="text-xl py-2">About</h5>
-          <Link to="/about" className="text-sm py-1 hover:text-gray-400">
-            Our Mission
-          </Link>
-          <Link to="/technology" className="text-sm py-1 hover:text-gray-400">
-            Our Technology
-          </Link>
-          <Link to="/careers" className="text-sm py-1 hover:text-gray-400">
-            Careers
-          </Link>
-          <Link to="/contact" className="text-sm py-1 hover:text-gray-400">
-            Contact Us
-          </Link>
+        {/* 2️⃣ About Section */}
+        <div>
+          <h5 className="text-lg font-semibold pb-2">About</h5>
+          <ul className="space-y-2 text-gray-900 text-sm">
+            <li><Link to="/about" className="hover:text-gray-900 transition">Our Mission</Link></li>
+            <li><Link to="/technology" className="hover:text-gray-900 transition">Our Technology</Link></li>
+            <li><Link to="/careers" className="hover:text-gray-900 transition">Careers</Link></li>
+            <li><Link to="/contact" className="hover:text-gray-900 transition">Contact Us</Link></li>
+          </ul>
         </div>
 
-        {/* Quick Links */}
-        <div className="flex flex-col mt-6 lg:mt-0">
-          <h5 className="text-xl py-2">Quick Links</h5>
-          {["Home", "Rocket Motors", "Propulsion Systems", "Launch Schedule", "Investor Relations"].map((link, index) => (
-            <p key={index} className="text-sm py-1 hover:text-gray-400 cursor-pointer">
-              {link}
-            </p>
-          ))}
-        </div>
-
-        {/* Support Section */}
-        <div className="flex flex-col mt-6 lg:mt-0">
-          <h5 className="text-xl py-2">Support</h5>
-          <Link to="/support#contact" className="text-sm py-1 hover:text-gray-400">
-            Contact Support
-          </Link>
-          {["Privacy Policy", "Terms of Service", "FAQs", "Supplier Partnerships"].map((item, index) => (
-            <p key={index} className="text-sm py-1 hover:text-gray-400 cursor-pointer">
-              {item}
-            </p>
-          ))}
-        </div>
-      </div>
-
-      {/* Manufacturing Locations */}
-      <div className="container mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center mt-6 px-6">
-        {[
-          { title: "Manufacturing Hubs", cities: ["Houston, TX", "Los Angeles, CA", "Seattle, WA", "Cape Canaveral, FL"] },
-          { title: "Testing & R&D", cities: ["Mojave, CA", "New Mexico", "Colorado Springs, CO", "Huntsville, AL"] },
-          { title: "Global Distribution", cities: ["Berlin, Germany", "Tokyo, Japan", "Bangalore, India", "Dubai, UAE"] },
-          { title: "Supplier Networks", cities: ["Montreal, Canada", "São Paulo, Brazil", "Sydney, Australia", "Paris, France"] }
-        ].map((section, index) => (
-          <div key={index} className="flex flex-col">
-            <h5 className="text-lg py-2 text-gray-300">{section.title}</h5>
-            {section.cities.map((city, i) => (
-              <p key={i} className="text-sm py-1 hover:text-gray-400">{city}</p>
+        {/* 3️⃣ Quick Links */}
+        <div>
+          <h5 className="text-lg font-semibold pb-2">Quick Links</h5>
+          <ul className="space-y-2 text-gray-900 text-sm">
+            {["Home", "About", "Service", "Contact Us"].map((link, index) => (
+              <li key={index} className="hover:text-gray-900 cursor-pointer">{link}</li>
             ))}
-          </div>
-        ))}
+          </ul>
+        </div>
+
+        {/* 4️⃣ Support Section */}
+        <div>
+          <h5 className="text-lg font-semibold pb-2">Support</h5>
+          <ul className="space-y-2 text-gray-900 text-sm">
+            <li><Link to="/support#contact" className="hover:text-gray-900">Contact Support</Link></li>
+            {["Privacy Policy", "Terms of Service", "FAQs"].map((item, index) => (
+              <li key={index} className="hover:text-gray-900 cursor-pointer">{item}</li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      {/* Social Media Icons */}
+      {/* 🌐 Social Media Icons */}
       <div className="flex justify-center space-x-4 mt-6">
         {[Instagram, Facebook, X, LinkedIn, YouTube].map((Icon, index) => (
-          <button key={index} className="p-3 rounded-full bg-gray-700 hover:bg-gray-600">
-            <Icon className="text-white" />
+          <button key={index} className="p-3 rounded-full bg-gray-100 hover:bg-gray-200">
+            <Icon className="text-gray-700" />
           </button>
         ))}
       </div>
 
-      {/* Copyright */}
-      <div className="text-center text-sm mt-4 text-gray-500">
-        &copy; 2024 SpearSpace Rocket Motors. All rights reserved.
+      {/* 📌 Copyright Section */}
+      <div className="text-center text-xs mt-6 text-gray-500 border-t border-gray-300 py-4">
+        &copy; {new Date().getFullYear()} SpearSpace Rocket Motors. All rights reserved.
       </div>
     </footer>
   );

@@ -2,65 +2,128 @@ import React, { useState, useContext } from "react";
 import { BiMenu } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { AuthContext } from "../context/AuthContext"; // Import AuthContext
+import { Avatar, Menu, MenuItem, Badge } from "@mui/material"; // Import Badge for quantity display
+import { ShopContext } from "../context/ShopContext"; // Import ShopContext for cart data
 import profile from "../../assets/profile.jpg";
-import { ShopContext } from "../context/ShopContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext); // Get user state
   const { cart } = useContext(ShopContext); // Get cart data
 
   // Calculate total quantity in the cart
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  // State for profile menu
+  const [profileMenu, setProfileMenu] = useState(null);
+
+  // Function to open profile menu
+  const handleProfileClick = (event) => {
+    setProfileMenu(event.currentTarget);
+  };
+
+  // Function to close profile menu
+  const handleProfileClose = () => {
+    setProfileMenu(null);
+  };
+
   return (
-    <nav className="bg-gradient-to-r from-black to-blue-900 ">
+    <nav className="bg-gradient-to-r from-black to-blue-900">
       <div className="flex justify-between items-center px-6 md:px-10 py-4 w-full">
-        {/* Logo */}
         <Link to="/" className="text-2xl font-bold text-white">
           Spearspace
         </Link>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-white text-lg hover:no-underline">
-            Home
-          </Link>
-          <Link to="/about" className="text-white text-lg hover:no-underline">
-            About
-          </Link>
-          <Link to="/service" className="text-white text-lg hover:no-underline">
-            Service
-          </Link>
-
-          {/* Cart with Badge */}
+          {/* Cart with Quantity Badge */}
           <Link to="/addtocart" className="relative">
-            <ShoppingCartIcon className="text-white text-3xl" />
-            {totalQuantity > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs h-5 w-5 flex items-center justify-center rounded-full">
-                {totalQuantity}
-              </span>
-            )}
+            <Badge badgeContent={totalQuantity} color="error">
+              <ShoppingCartIcon className="text-white text-3xl" />
+            </Badge>
           </Link>
 
-          {/* Profile Image */}
-          <Link to="/login">
-            <img
-              src={profile}
-              alt="Profile"
-              className="w-7 h-7 rounded-full border-2 border-white"
-            />
-          </Link>
+          {/* Conditional Rendering for Authenticated Users */}
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Link to="/profile" className="text-white font-semibold hover:text-gray-300">
+                {user.firstName}
+              </Link>
+              <button onClick={handleProfileClick}>
+                <Avatar 
+                  src={profile} 
+                  alt="Profile" 
+                  className="border-2 border-gray-300" 
+                />
+              </button>
+              <Menu 
+                anchorEl={profileMenu} 
+                open={Boolean(profileMenu)} 
+                onClose={handleProfileClose}
+              >
+                <Link to="/profile">
+                  <MenuItem onClick={handleProfileClose}>Profile</MenuItem>
+                </Link>
+                <Link to="/">
+                <MenuItem onClick={logout}>Logout</MenuItem>
+                </Link>
+              </Menu>
+            </div>
+          ) : (
+            <Link to="/signin" className="text-white font-semibold hover:text-gray-300">
+              Login
+            </Link>
+          )}
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white text-3xl"
-        >
-          <BiMenu />
-        </button>
+        <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="md:hidden text-white text-3xl hover:text-gray-300 transition duration-300">
+        <BiMenu />
+      </button>
+
       </div>
+      {isOpen && (
+  <div className="md:hidden flex flex-col items-center bg-blue-900 py-4 space-y-4">
+    <Link to="/addtocart" className="relative">
+            <Badge badgeContent={totalQuantity} color="error">
+              <ShoppingCartIcon className="text-white text-3xl" />
+            </Badge>
+          </Link>
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Link to="/profile" className="text-white font-semibold hover:text-gray-300">
+                {user.firstName}
+              </Link>
+              <button onClick={handleProfileClick}>
+                <Avatar 
+                  src={profile} 
+                  alt="Profile" 
+                  className="border-2 border-gray-300" 
+                />
+              </button>
+              <Menu 
+                anchorEl={profileMenu} 
+                open={Boolean(profileMenu)} 
+                onClose={handleProfileClose}
+              >
+                <Link to="/profile">
+                  <MenuItem onClick={handleProfileClose}>Profile</MenuItem>
+                </Link>
+                <Link to="/">
+                <MenuItem onClick={logout}>Logout</MenuItem>
+                </Link>
+              </Menu>
+            </div>
+          ) : (
+            <Link to="/signin" className="text-white font-semibold hover:text-gray-300">
+              Login
+            </Link>
+          )}
+  </div>
+)}
     </nav>
+    
   );
 };
 
